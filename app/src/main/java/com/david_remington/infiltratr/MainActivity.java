@@ -28,17 +28,16 @@ public class MainActivity extends AppCompatActivity {
         Typeface myCustomFont = Typeface.createFromAsset(getAssets(), "Rustico.ttf");
         mTitleTextView.setTypeface(myCustomFont);
 
-    //Try to get Picasso working on Monday. Background is hardcoded for now
-//        Picasso.with(this)
-//                .load("http://i64.photobucket.com/albums/h164/hewhoiswithoutaname/background_zpsz298orhf.jpg")
-//                .resize(50, 50)
-//                .centerCrop()
-//                .into(mLandingPageImageView);
+        Picasso.with(this)
+                .load("http://i64.photobucket.com/albums/h164/hewhoiswithoutaname/background_zpsz298orhf.jpg")
+                .resize(800, 500)
+                .centerCrop()
+                .into(mLandingPageImageView);
 
         mStartButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                Intent intent = new Intent(MainActivity.this, MapActivity.class);
+                Intent intent = new Intent(MainActivity.this, MapsActivity.class);
                 startActivity(intent);
             }
         });

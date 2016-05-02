@@ -6,3 +6,6 @@
 .DS_Store
 /build
 /captures
+/gradle.properties
+/app/src/release/res/values/google_maps_api.xml
+/app/src/main/res/values/google_maps_api.xml
