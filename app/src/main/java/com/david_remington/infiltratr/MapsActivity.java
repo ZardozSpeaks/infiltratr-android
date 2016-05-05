@@ -8,6 +8,7 @@ import android.support.annotation.NonNull;
 import android.support.v4.app.FragmentActivity;
 import android.os.Bundle;
 import android.support.v4.content.ContextCompat;
+import android.util.Log;
 import android.widget.Toast;
 
 import com.google.android.gms.common.ConnectionResult;
@@ -24,6 +25,7 @@ import com.google.android.gms.maps.model.LatLng;
 
 public class MapsActivity extends FragmentActivity implements
         OnMapReadyCallback,
+        GoogleApiClient.ConnectionCallbacks,
         GoogleApiClient.OnConnectionFailedListener,
         LocationListener {
 
@@ -31,30 +33,44 @@ public class MapsActivity extends FragmentActivity implements
     private GoogleApiClient mGoogleApiClient;
     private LocationRequest mLocationRequest;
     private final static int CONNECTION_FAILURE_RESOLUTION_REQUEST = 9000;
+    public static final String TAG = MapsActivity.class.getSimpleName();
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_maps);
 
-        mLocationRequest = LocationRequest.create()
-                .setPriority(LocationRequest.PRIORITY_HIGH_ACCURACY)
-                .setInterval(10 * 1000)
-                .setFastestInterval(1000);
-
-
-        mGoogleApiClient = new GoogleApiClient.Builder(this)
-                .addOnConnectionFailedListener(this)
-                .addApi(LocationServices.API)
-                .build();
-
-
+        SupportMapFragment mapFragment = (SupportMapFragment) getSupportFragmentManager()
+                .findFragmentById(R.id.map);
+        mapFragment.getMapAsync(this);
 
     }
 
     @Override
     public void onMapReady(GoogleMap map) {
+        mMap = map;
+
+        if (ContextCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION)
+                == PackageManager.PERMISSION_GRANTED) {
+            mMap.setMyLocationEnabled(true);
+        }
+        else {
+            String warning = "You must enable location services in app permissions to view this screen";
+            Toast.makeText(this, warning , Toast.LENGTH_LONG)
+                    .show();
+        }
+
+        buildGoogleApiClient();
+    }
+
+
+    @Override
+    public void onConnected(Bundle bundle) {
         Location location = null;
+        mLocationRequest = LocationRequest.create()
+                .setPriority(LocationRequest.PRIORITY_HIGH_ACCURACY)
+                .setInterval(10 * 1000)
+                .setFastestInterval(1000);
         if (ContextCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION)
                 == PackageManager.PERMISSION_GRANTED) {
             location = LocationServices.FusedLocationApi.getLastLocation(mGoogleApiClient);
@@ -72,22 +88,8 @@ public class MapsActivity extends FragmentActivity implements
     }
 
     @Override
-    protected void onResume() {
-        super.onResume();
-        MapFragment mapFragment = (MapFragment) getFragmentManager()
-                .findFragmentById(R.id.map);
-        mapFragment.getMapAsync(this);
-        mGoogleApiClient.connect();
-    }
+    public void onConnectionSuspended(int i) {
 
-    @Override
-    protected void onPause() {
-        super.onPause();
-
-        if (mGoogleApiClient.isConnected()) {
-            LocationServices.FusedLocationApi.removeLocationUpdates(mGoogleApiClient, this);
-            mGoogleApiClient.disconnect();
-        }
     }
 
 
@@ -120,22 +122,18 @@ public class MapsActivity extends FragmentActivity implements
         handleNewLocation(location);
     }
 
-    protected void setUpMapIfNeeded() {
-        MapFragment mapFragment = (MapFragment) getFragmentManager()
-                .findFragmentById(R.id.map);
-        if (mapFragment == null) {
-            SupportMapFragment fragment = ((SupportMapFragment) getSupportFragmentManager().findFragmentById(R.id.map));
-            // Check if we were successful in obtaining the map.
-            if (mapFragment != null) {
-                mapFragment.getMapAsync(new OnMapReadyCallback() {
-                    @Override
-                    public void onMapReady(GoogleMap map) {
-                        loadMap(map);
-                    }
-                });
-            }
-        }
+
+
+    private void buildGoogleApiClient() {
+
+        mGoogleApiClient = new GoogleApiClient.Builder(this)
+                .addOnConnectionFailedListener(this)
+                .addApi(LocationServices.API)
+                .build();
+        mGoogleApiClient.connect();
+
     }
+
 
 
 }
