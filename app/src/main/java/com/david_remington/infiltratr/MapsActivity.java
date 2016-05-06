@@ -31,6 +31,7 @@ public class MapsActivity extends FragmentActivity implements
     private GoogleApiClient mGoogleApiClient;
     private LocationRequest mLocationRequest;
     private Location mLastLocation;
+    private static int mRefreshCount;
     private final static int CONNECTION_FAILURE_RESOLUTION_REQUEST = 9000;
 
     /* defines location request for onLocationChange,
@@ -41,6 +42,7 @@ public class MapsActivity extends FragmentActivity implements
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_maps);
+        mRefreshCount = 0;
 
         mLocationRequest = LocationRequest.create()
                 .setPriority(LocationRequest.PRIORITY_HIGH_ACCURACY)
@@ -127,12 +129,13 @@ public class MapsActivity extends FragmentActivity implements
 
     /* listens for results of location update callback
        redefines location member variable based on results
-       invokes location handler method to move center map view and zoom*/
+       invokes location handler method to move center map view and zoom if first refresh*/
 
     @Override
     public void onLocationChanged(Location location) {
         mLastLocation = location;
-        handleNewLocation(location);
+            handleNewLocation(location);
+
     }
 
     /* handles activity lifestyle */
@@ -150,6 +153,7 @@ public class MapsActivity extends FragmentActivity implements
         stopLocationUpdates();
     }
 
+
     @Override
     protected void onStop() {
         super.onStop();
@@ -158,13 +162,19 @@ public class MapsActivity extends FragmentActivity implements
         }
     }
 
-    /* centers the map view and zooms camera on location */
+    /* centers the map view on update
+       zooms camera on 1st location update */
 
     private void handleNewLocation(Location location) {
         double currentLatitude = location.getLatitude();
         double currentLongitude = location.getLongitude();
         LatLng latLng = new LatLng(currentLatitude, currentLongitude);
-        mMap.animateCamera(CameraUpdateFactory.newLatLngZoom(latLng, 15.0f));
+        if (mRefreshCount == 0) {
+            mMap.animateCamera(CameraUpdateFactory.newLatLngZoom(latLng, 15.0f));
+            mRefreshCount ++;
+        } else {
+            mMap.animateCamera(CameraUpdateFactory.newLatLng(latLng));
+        }
     }
 
     /* constructs the play services callback client*/
@@ -187,6 +197,8 @@ public class MapsActivity extends FragmentActivity implements
             LocationServices.FusedLocationApi.requestLocationUpdates(mGoogleApiClient, mLocationRequest, this);
         }
     }
+
+    /* end connection with play services to save batteries*/
 
     protected void stopLocationUpdates() {
         if (mGoogleApiClient != null) {
