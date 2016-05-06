@@ -73,8 +73,6 @@ public class MapsActivity extends FragmentActivity implements
                     .show();
         }
 
-        buildGoogleApiClient();
-        mGoogleApiClient.connect();
     }
 
     /* listens for results of callback to play services
@@ -137,6 +135,28 @@ public class MapsActivity extends FragmentActivity implements
         handleNewLocation(location);
     }
 
+    /* handles activity lifestyle */
+
+    @Override
+    protected void onStart() {
+        super.onStart();
+        buildGoogleApiClient();
+        mGoogleApiClient.connect();
+    }
+
+    @Override
+    protected void onPause() {
+        super.onPause();
+        stopLocationUpdates();
+    }
+
+    @Override
+    protected void onStop() {
+        super.onStop();
+        if (mGoogleApiClient != null) {
+            mGoogleApiClient.disconnect();
+        }
+    }
 
     /* centers the map view and zooms camera on location */
 
@@ -167,5 +187,13 @@ public class MapsActivity extends FragmentActivity implements
             LocationServices.FusedLocationApi.requestLocationUpdates(mGoogleApiClient, mLocationRequest, this);
         }
     }
+
+    protected void stopLocationUpdates() {
+        if (mGoogleApiClient != null) {
+            LocationServices.FusedLocationApi.removeLocationUpdates(
+                    mGoogleApiClient, this);
+        }
+    }
+
 
 }
