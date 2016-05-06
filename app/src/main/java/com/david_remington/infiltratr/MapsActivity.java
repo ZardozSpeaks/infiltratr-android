@@ -5,9 +5,11 @@ import android.content.IntentSender;
 import android.content.pm.PackageManager;
 import android.location.Location;
 import android.support.annotation.NonNull;
+import android.support.design.widget.FloatingActionButton;
 import android.support.v4.app.FragmentActivity;
 import android.os.Bundle;
 import android.support.v4.content.ContextCompat;
+import android.view.View;
 import android.widget.Toast;
 
 import com.google.android.gms.common.ConnectionResult;
@@ -19,19 +21,26 @@ import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.OnMapReadyCallback;
 import com.google.android.gms.maps.SupportMapFragment;
+import com.google.android.gms.maps.model.BitmapDescriptorFactory;
 import com.google.android.gms.maps.model.LatLng;
+import com.google.android.gms.maps.model.MarkerOptions;
+
+import butterknife.Bind;
+import butterknife.ButterKnife;
 
 public class MapsActivity extends FragmentActivity implements
         OnMapReadyCallback,
         GoogleApiClient.ConnectionCallbacks,
         GoogleApiClient.OnConnectionFailedListener,
-        LocationListener {
+        LocationListener,
+        GoogleMap.OnMapClickListener {
 
     private GoogleMap mMap;
     private GoogleApiClient mGoogleApiClient;
     private LocationRequest mLocationRequest;
     private Location mLastLocation;
     private static int mRefreshCount;
+    @Bind(R.id.fab) FloatingActionButton mFab;
     private final static int CONNECTION_FAILURE_RESOLUTION_REQUEST = 9000;
 
     /* defines location request for onLocationChange,
@@ -43,6 +52,7 @@ public class MapsActivity extends FragmentActivity implements
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_maps);
         mRefreshCount = 0;
+
 
         mLocationRequest = LocationRequest.create()
                 .setPriority(LocationRequest.PRIORITY_HIGH_ACCURACY)
@@ -63,6 +73,7 @@ public class MapsActivity extends FragmentActivity implements
     @Override
     public void onMapReady(GoogleMap map) {
         mMap = map;
+        ButterKnife.bind(this);
 
         if (ContextCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION)
                 == PackageManager.PERMISSION_GRANTED) {
@@ -74,6 +85,16 @@ public class MapsActivity extends FragmentActivity implements
             Toast.makeText(this, warning , Toast.LENGTH_LONG)
                     .show();
         }
+
+         /* allow user to drop pin on screen */
+
+        mFab.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                mMap.setOnMapClickListener(MapsActivity.this);
+
+            }
+        });
 
     }
 
@@ -172,8 +193,6 @@ public class MapsActivity extends FragmentActivity implements
         if (mRefreshCount == 0) {
             mMap.animateCamera(CameraUpdateFactory.newLatLngZoom(latLng, 15.0f));
             mRefreshCount ++;
-        } else {
-            mMap.animateCamera(CameraUpdateFactory.newLatLng(latLng));
         }
     }
 
@@ -207,5 +226,12 @@ public class MapsActivity extends FragmentActivity implements
         }
     }
 
-
+    @Override
+    public void onMapClick(LatLng latLng) {
+        MarkerOptions options=new MarkerOptions()
+                .icon(BitmapDescriptorFactory.fromResource(R.drawable.cave_2))
+                .anchor(0.5f, 0.5f);
+        options.position(latLng);
+        mMap.addMarker(options);
+    }
 }
