@@ -48,5 +48,6 @@ dependencies {
     compile 'com.jakewharton:butterknife:7.0.1'
     compile 'com.squareup.picasso:picasso:2.5.2'
     compile 'se.akerfeldt:okhttp-signpost:1.1.0'
+    compile 'com.firebase:geofire:1.1.0+'
     compile 'com.firebase:firebase-client-android:2.3.1'
 }

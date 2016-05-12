@@ -11,11 +11,17 @@ import android.support.v4.app.FragmentActivity;
 import android.os.Bundle;
 import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AlertDialog;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.widget.Toast;
 
+import com.firebase.client.DataSnapshot;
 import com.firebase.client.Firebase;
+import com.firebase.client.FirebaseError;
+import com.firebase.client.Query;
+import com.firebase.client.ValueEventListener;
+import com.firebase.geofire.GeoFire;
 import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.api.GoogleApiClient;
 import com.google.android.gms.location.LocationListener;
@@ -29,6 +35,12 @@ import com.google.android.gms.maps.model.BitmapDescriptorFactory;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
+
+import org.json.JSONArray;
+
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.Map;
 
 import butterknife.Bind;
 import butterknife.ButterKnife;
@@ -46,6 +58,7 @@ public class MapsActivity extends FragmentActivity implements
     private LocationRequest mLocationRequest;
     private Location mLastLocation;
     private static int mRefreshCount;
+    private ArrayList<LatLng> mSavedLocations;
     @Bind(R.id.fab) FloatingActionButton mFab;
     private final static int CONNECTION_FAILURE_RESOLUTION_REQUEST = 9000;
 
@@ -91,6 +104,7 @@ public class MapsActivity extends FragmentActivity implements
             Toast.makeText(this, warning , Toast.LENGTH_LONG)
                     .show();
         }
+
 
          /* allow user to drop pin on screen */
 
@@ -200,6 +214,7 @@ public class MapsActivity extends FragmentActivity implements
         if (mRefreshCount == 0) {
             mMap.animateCamera(CameraUpdateFactory.newLatLngZoom(latLng, 15.0f));
             mRefreshCount ++;
+            drawLocations();
         }
     }
 
@@ -244,7 +259,12 @@ public class MapsActivity extends FragmentActivity implements
 
     @Override
     public boolean onMarkerClick(Marker marker) {
-        final String location = marker.getPosition().toString();
+        final Marker currentMarker = marker;
+        final Map coordinates = new HashMap();
+        Double lat = currentMarker.getPosition().latitude;
+        Double lng = currentMarker.getPosition().longitude;
+        coordinates.put("latitude",lat);
+        coordinates.put("longitude",lng);
         LayoutInflater factory = LayoutInflater.from(this);
         final View view = factory.inflate(R.layout.display_pin_item, null);
         AlertDialog.Builder builder = new AlertDialog.Builder(this);
@@ -253,11 +273,12 @@ public class MapsActivity extends FragmentActivity implements
                 .setCancelable(false)
                 .setPositiveButton("Yes", new DialogInterface.OnClickListener() {
                     public void onClick(DialogInterface dialog, int id) {
-                        saveLocationToFirebase(location);
+                        saveLocationToFirebase(coordinates);
                     }
                 })
                 .setNegativeButton("No", new DialogInterface.OnClickListener() {
                     public void onClick(DialogInterface dialog, int id) {
+                        currentMarker.remove();
                         dialog.cancel();
                     }
                 })
@@ -266,10 +287,37 @@ public class MapsActivity extends FragmentActivity implements
         return false;
     }
 
-    public void saveLocationToFirebase(String location) {
-        Firebase pinLocationRef = new Firebase(Constants.FIREBASE_URL_SAVED_LOCATION);
-        pinLocationRef.push().setValue(location);
+    public void saveLocationToFirebase(Map coordinates) {
+        Firebase savedLocationRef = new Firebase(Constants.FIREBASE_URL_SAVED_LOCATION);
+        savedLocationRef.push().setValue(coordinates);
     }
+
+    public void drawLocations() {
+        Firebase savedLocationRef = new Firebase(Constants.FIREBASE_URL_SAVED_LOCATION);
+        savedLocationRef.addValueEventListener(new ValueEventListener() {
+            @Override
+            public void onDataChange(DataSnapshot snapshot) {
+                for(DataSnapshot postSnapshot: snapshot.getChildren() ) {
+                    Map data = (HashMap) postSnapshot.getValue();
+                    Double latitude = (Double) (data.get("latitude"));
+                    Double longitude = (Double) (data.get("longitude"));
+                    LatLng latLng = new LatLng(latitude, longitude);
+                    MarkerOptions options=new MarkerOptions()
+                            .icon(BitmapDescriptorFactory.fromResource(R.drawable.cave_2))
+                            .anchor(0.5f, 0.5f);
+                    options.position(latLng);
+                    mMap.addMarker(options);
+                }
+            }
+
+            @Override
+            public void onCancelled(FirebaseError firebaseError) {
+                System.out.println("The read failed: " + firebaseError.getMessage());
+            }
+        });
+    }
+
+
 
     //TODO: create pin object to be saved in savelocation method
 }
