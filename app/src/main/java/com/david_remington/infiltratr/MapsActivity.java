@@ -1,6 +1,7 @@
 package com.david_remington.infiltratr;
 
 import android.Manifest;
+import android.content.DialogInterface;
 import android.content.IntentSender;
 import android.content.pm.PackageManager;
 import android.location.Location;
@@ -9,9 +10,12 @@ import android.support.design.widget.FloatingActionButton;
 import android.support.v4.app.FragmentActivity;
 import android.os.Bundle;
 import android.support.v4.content.ContextCompat;
+import android.support.v7.app.AlertDialog;
+import android.view.LayoutInflater;
 import android.view.View;
 import android.widget.Toast;
 
+import com.firebase.client.Firebase;
 import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.api.GoogleApiClient;
 import com.google.android.gms.location.LocationListener;
@@ -23,6 +27,7 @@ import com.google.android.gms.maps.OnMapReadyCallback;
 import com.google.android.gms.maps.SupportMapFragment;
 import com.google.android.gms.maps.model.BitmapDescriptorFactory;
 import com.google.android.gms.maps.model.LatLng;
+import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
 
 import butterknife.Bind;
@@ -33,7 +38,8 @@ public class MapsActivity extends FragmentActivity implements
         GoogleApiClient.ConnectionCallbacks,
         GoogleApiClient.OnConnectionFailedListener,
         LocationListener,
-        GoogleMap.OnMapClickListener {
+        GoogleMap.OnMapClickListener,
+        GoogleMap.OnMarkerClickListener{
 
     private GoogleMap mMap;
     private GoogleApiClient mGoogleApiClient;
@@ -92,6 +98,7 @@ public class MapsActivity extends FragmentActivity implements
             @Override
             public void onClick(View view) {
                 mMap.setOnMapClickListener(MapsActivity.this);
+                mMap.setOnMarkerClickListener(MapsActivity.this);
 
             }
         });
@@ -234,4 +241,35 @@ public class MapsActivity extends FragmentActivity implements
         options.position(latLng);
         mMap.addMarker(options);
     }
+
+    @Override
+    public boolean onMarkerClick(Marker marker) {
+        final String location = marker.getPosition().toString();
+        LayoutInflater factory = LayoutInflater.from(this);
+        final View view = factory.inflate(R.layout.display_pin_item, null);
+        AlertDialog.Builder builder = new AlertDialog.Builder(this);
+        builder.setTitle("Save Pin");
+        builder.setMessage("Would you like to save this pin?")
+                .setCancelable(false)
+                .setPositiveButton("Yes", new DialogInterface.OnClickListener() {
+                    public void onClick(DialogInterface dialog, int id) {
+                        saveLocationToFirebase(location);
+                    }
+                })
+                .setNegativeButton("No", new DialogInterface.OnClickListener() {
+                    public void onClick(DialogInterface dialog, int id) {
+                        dialog.cancel();
+                    }
+                })
+                .setView(view)
+                .show();
+        return false;
+    }
+
+    public void saveLocationToFirebase(String location) {
+        Firebase pinLocationRef = new Firebase(Constants.FIREBASE_URL_SAVED_LOCATION);
+        pinLocationRef.push().setValue(location);
+    }
+
+    //TODO: create pin object to be saved in savelocation method
 }

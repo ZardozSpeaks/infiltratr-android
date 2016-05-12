@@ -1,7 +1,9 @@
 package com.david_remington.infiltratr;
 
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.graphics.Typeface;
+import android.preference.PreferenceManager;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.view.View;
@@ -15,6 +17,7 @@ import butterknife.Bind;
 import butterknife.ButterKnife;
 
 public class MainActivity extends AppCompatActivity {
+
     @Bind(R.id.landingPageImageView) ImageView mLandingPageImageView;
     @Bind(R.id.startButton) Button mStartButton;
     @Bind(R.id.titleTextView) TextView mTitleTextView;
