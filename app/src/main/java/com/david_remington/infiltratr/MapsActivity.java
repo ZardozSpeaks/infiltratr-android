@@ -316,8 +316,4 @@ public class MapsActivity extends FragmentActivity implements
             }
         });
     }
-
-
-
-    //TODO: create pin object to be saved in savelocation method
 }
