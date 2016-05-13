@@ -1,6 +1,8 @@
-package com.david_remington.infiltratr;
+package com.david_remington.infiltratr.Activities;
 
 import android.Manifest;
+import android.app.Fragment;
+import android.app.FragmentManager;
 import android.content.DialogInterface;
 import android.content.IntentSender;
 import android.content.pm.PackageManager;
@@ -11,17 +13,17 @@ import android.support.v4.app.FragmentActivity;
 import android.os.Bundle;
 import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AlertDialog;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.widget.Toast;
 
+import com.david_remington.infiltratr.Constants;
+import com.david_remington.infiltratr.Fragments.AddMarkerDialogFragment;
+import com.david_remington.infiltratr.R;
 import com.firebase.client.DataSnapshot;
 import com.firebase.client.Firebase;
 import com.firebase.client.FirebaseError;
-import com.firebase.client.Query;
 import com.firebase.client.ValueEventListener;
-import com.firebase.geofire.GeoFire;
 import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.api.GoogleApiClient;
 import com.google.android.gms.location.LocationListener;
@@ -35,8 +37,6 @@ import com.google.android.gms.maps.model.BitmapDescriptorFactory;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
-
-import org.json.JSONArray;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -250,11 +250,13 @@ public class MapsActivity extends FragmentActivity implements
 
     @Override
     public void onMapClick(LatLng latLng) {
-        MarkerOptions options=new MarkerOptions()
-                .icon(BitmapDescriptorFactory.fromResource(R.drawable.cave_2))
-                .anchor(0.5f, 0.5f);
-        options.position(latLng);
-        mMap.addMarker(options);
+        FragmentManager manager = getFragmentManager();
+        Fragment frag = manager.findFragmentByTag("fragment_add_marker");
+        if (frag != null) {
+            manager.beginTransaction().remove(frag).commit();
+        }
+        AddMarkerDialogFragment dialogFragment = new AddMarkerDialogFragment();
+        dialogFragment.show(manager, "fragment_add_marker");
     }
 
     @Override
@@ -266,7 +268,7 @@ public class MapsActivity extends FragmentActivity implements
         coordinates.put("latitude",lat);
         coordinates.put("longitude",lng);
         LayoutInflater factory = LayoutInflater.from(this);
-        final View view = factory.inflate(R.layout.display_pin_item, null);
+//        final View view = factory.inflate(R.layout.display_pin_item, null);
         AlertDialog.Builder builder = new AlertDialog.Builder(this);
         builder.setTitle("Save Pin");
         builder.setMessage("Would you like to save this pin?")

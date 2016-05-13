@@ -1,21 +1,26 @@
-package com.david_remington.infiltratr;
+package com.david_remington.infiltratr.Classes;
 
-import com.google.android.gms.maps.model.BitmapDescriptor;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.MarkerOptions;
 
+import org.parceler.Parcel;
+
+@Parcel
 public class LocationMarker {
-    private LatLng mCoodinates;
-    private BitmapDescriptor mLocationIcon;
+    private LatLng mCoordinates;
     private String mLocationTitle;
     private String mSnippet;
 
-    public LatLng getCoodinates() {
-        return mCoodinates;
+    public LocationMarker(){}
+
+    public LocationMarker(LatLng coordinates, String locationTitle, String snippet) {
+        this.mCoordinates = coordinates;
+        this.mLocationTitle = locationTitle;
+        this.mSnippet = snippet;
     }
 
-    public BitmapDescriptor getLocationIcon() {
-        return mLocationIcon;
+    public LatLng getCoodinates() {
+        return mCoordinates;
     }
 
     public String getLocationTitle() {
@@ -28,8 +33,7 @@ public class LocationMarker {
 
     public MarkerOptions buildLocationMarker() {
         return new MarkerOptions()
-                .position(this.mCoodinates)
-                .icon(this.mLocationIcon)
+                .position(this.mCoordinates)
                 .title(this.mLocationTitle)
                 .snippet(this.mSnippet)
                 .anchor(0.5f, 0.5f);

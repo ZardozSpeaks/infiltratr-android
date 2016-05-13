@@ -1,9 +1,7 @@
-package com.david_remington.infiltratr;
+package com.david_remington.infiltratr.Activities;
 
 import android.content.Intent;
-import android.content.SharedPreferences;
 import android.graphics.Typeface;
-import android.preference.PreferenceManager;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.view.View;
@@ -11,6 +9,7 @@ import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.TextView;
 
+import com.david_remington.infiltratr.R;
 import com.squareup.picasso.Picasso;
 
 import butterknife.Bind;
