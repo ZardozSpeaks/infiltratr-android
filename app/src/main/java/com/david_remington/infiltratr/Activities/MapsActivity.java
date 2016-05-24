@@ -7,19 +7,21 @@ import android.content.DialogInterface;
 import android.content.IntentSender;
 import android.content.pm.PackageManager;
 import android.location.Location;
+import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.design.widget.FloatingActionButton;
 import android.support.v4.app.FragmentActivity;
-import android.os.Bundle;
 import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AlertDialog;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.widget.Toast;
 
+import com.david_remington.infiltratr.Classes.LocationMarker;
 import com.david_remington.infiltratr.Constants;
 import com.david_remington.infiltratr.Fragments.AddMarkerDialogFragment;
 import com.david_remington.infiltratr.R;
+import com.fasterxml.jackson.databind.util.JSONPObject;
 import com.firebase.client.DataSnapshot;
 import com.firebase.client.Firebase;
 import com.firebase.client.FirebaseError;
@@ -38,7 +40,8 @@ import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
 
-import java.util.ArrayList;
+import org.json.JSONObject;
+
 import java.util.HashMap;
 import java.util.Map;
 
@@ -58,9 +61,8 @@ public class MapsActivity extends FragmentActivity implements
     private LocationRequest mLocationRequest;
     private Location mLastLocation;
     private static int mRefreshCount;
-    private ArrayList<LatLng> mSavedLocations;
-    @Bind(R.id.fab) FloatingActionButton mFab;
     private final static int CONNECTION_FAILURE_RESOLUTION_REQUEST = 9000;
+    @Bind(R.id.fab) FloatingActionButton mFab;
 
     /* defines location request for onLocationChange,
        locates map fragment,
@@ -255,7 +257,7 @@ public class MapsActivity extends FragmentActivity implements
         if (frag != null) {
             manager.beginTransaction().remove(frag).commit();
         }
-        AddMarkerDialogFragment dialogFragment = new AddMarkerDialogFragment();
+        AddMarkerDialogFragment dialogFragment = AddMarkerDialogFragment.newInstance(latLng);
         dialogFragment.show(manager, "fragment_add_marker");
     }
 
@@ -267,31 +269,12 @@ public class MapsActivity extends FragmentActivity implements
         Double lng = currentMarker.getPosition().longitude;
         coordinates.put("latitude",lat);
         coordinates.put("longitude",lng);
-        LayoutInflater factory = LayoutInflater.from(this);
-//        final View view = factory.inflate(R.layout.display_pin_item, null);
-        AlertDialog.Builder builder = new AlertDialog.Builder(this);
-        builder.setTitle("Save Pin");
-        builder.setMessage("Would you like to save this pin?")
-                .setCancelable(false)
-                .setPositiveButton("Yes", new DialogInterface.OnClickListener() {
-                    public void onClick(DialogInterface dialog, int id) {
-                        saveLocationToFirebase(coordinates);
-                    }
-                })
-                .setNegativeButton("No", new DialogInterface.OnClickListener() {
-                    public void onClick(DialogInterface dialog, int id) {
-                        currentMarker.remove();
-                        dialog.cancel();
-                    }
-                })
-                .setView(view)
-                .show();
         return false;
     }
 
-    public void saveLocationToFirebase(Map coordinates) {
+    public static void saveLocationToFirebase(LocationMarker locationMarker) {
         Firebase savedLocationRef = new Firebase(Constants.FIREBASE_URL_SAVED_LOCATION);
-        savedLocationRef.push().setValue(coordinates);
+        savedLocationRef.push().setValue(locationMarker);
     }
 
     public void drawLocations() {
@@ -303,11 +286,10 @@ public class MapsActivity extends FragmentActivity implements
                     Map data = (HashMap) postSnapshot.getValue();
                     Double latitude = (Double) (data.get("latitude"));
                     Double longitude = (Double) (data.get("longitude"));
-                    LatLng latLng = new LatLng(latitude, longitude);
-                    MarkerOptions options=new MarkerOptions()
-                            .icon(BitmapDescriptorFactory.fromResource(R.drawable.cave_2))
-                            .anchor(0.5f, 0.5f);
-                    options.position(latLng);
+                    String title = (String)(data.get("locationTitle"));
+                    String snippet = (String)(data.get("snippet"));
+                    LocationMarker locationMarker = new LocationMarker(latitude, longitude, title, snippet);
+                    MarkerOptions options = locationMarker.buildLocationMarker();
                     mMap.addMarker(options);
                 }
             }
