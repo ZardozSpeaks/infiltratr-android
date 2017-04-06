@@ -1,4 +1,4 @@
-package com.david_remington.infiltratr.Activities;
+package com.davidremington.infiltratr.activities;
 
 import android.content.Intent;
 import android.graphics.Typeface;
@@ -9,11 +9,12 @@ import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.TextView;
 
-import com.david_remington.infiltratr.R;
 import com.squareup.picasso.Picasso;
 
 import butterknife.Bind;
 import butterknife.ButterKnife;
+
+import com.davidremington.infiltratr.R;
 
 public class MainActivity extends AppCompatActivity {
 

@@ -1,9 +1,8 @@
-package com.david_remington.infiltratr.Activities;
+package com.davidremington.infiltratr.activities;
 
 import android.Manifest;
 import android.app.Fragment;
 import android.app.FragmentManager;
-import android.content.DialogInterface;
 import android.content.IntentSender;
 import android.content.pm.PackageManager;
 import android.location.Location;
@@ -12,16 +11,12 @@ import android.support.annotation.NonNull;
 import android.support.design.widget.FloatingActionButton;
 import android.support.v4.app.FragmentActivity;
 import android.support.v4.content.ContextCompat;
-import android.support.v7.app.AlertDialog;
-import android.view.LayoutInflater;
 import android.view.View;
 import android.widget.Toast;
 
-import com.david_remington.infiltratr.Classes.LocationMarker;
-import com.david_remington.infiltratr.Constants;
-import com.david_remington.infiltratr.Fragments.AddMarkerDialogFragment;
-import com.david_remington.infiltratr.R;
-import com.fasterxml.jackson.databind.util.JSONPObject;
+import com.davidremington.infiltratr.models.LocationMarker;
+import com.davidremington.infiltratr.utils.Constants;
+import com.davidremington.infiltratr.fragments.AddMarkerDialogFragment;
 import com.firebase.client.DataSnapshot;
 import com.firebase.client.Firebase;
 import com.firebase.client.FirebaseError;
@@ -35,18 +30,18 @@ import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.OnMapReadyCallback;
 import com.google.android.gms.maps.SupportMapFragment;
-import com.google.android.gms.maps.model.BitmapDescriptorFactory;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
 
-import org.json.JSONObject;
 
 import java.util.HashMap;
 import java.util.Map;
 
 import butterknife.Bind;
 import butterknife.ButterKnife;
+
+import com.davidremington.infiltratr.R;
 
 public class MapsActivity extends FragmentActivity implements
         OnMapReadyCallback,

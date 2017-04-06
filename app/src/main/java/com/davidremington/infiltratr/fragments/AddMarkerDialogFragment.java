@@ -1,23 +1,18 @@
-package com.david_remington.infiltratr.Fragments;
+package com.davidremington.infiltratr.fragments;
 
 import android.app.DialogFragment;
 import android.os.Bundle;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.EditText;
 
-import com.david_remington.infiltratr.Activities.MapsActivity;
-import com.david_remington.infiltratr.Classes.LocationMarker;
-import com.david_remington.infiltratr.Constants;
-import com.david_remington.infiltratr.R;
-import com.firebase.client.Firebase;
-import com.google.android.gms.maps.model.BitmapDescriptor;
-import com.google.android.gms.maps.model.LatLng;
-import com.google.android.gms.maps.model.MarkerOptions;
+import com.davidremington.infiltratr.activities.MapsActivity;
+import com.davidremington.infiltratr.models.LocationMarker;
+import com.davidremington.infiltratr.R;
 
+import com.google.android.gms.maps.model.LatLng;
 import org.parceler.Parcels;
 
 

@@ -1,4 +1,4 @@
-package com.david_remington.infiltratr;
+package com.davidremington.infiltratr;
 
 import android.app.Application;
 

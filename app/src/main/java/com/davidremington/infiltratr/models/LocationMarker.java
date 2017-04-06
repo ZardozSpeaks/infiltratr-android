@@ -1,10 +1,11 @@
-package com.david_remington.infiltratr.Classes;
+package com.davidremington.infiltratr.models;
 
-import com.david_remington.infiltratr.R;
 import com.google.android.gms.maps.model.BitmapDescriptor;
 import com.google.android.gms.maps.model.BitmapDescriptorFactory;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.MarkerOptions;
+
+import com.davidremington.infiltratr.R;
 
 public class LocationMarker {
     private LatLng mCoordinates;
