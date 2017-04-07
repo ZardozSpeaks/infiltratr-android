@@ -8,10 +8,10 @@ import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.EditText;
 
-import com.davidremington.infiltratr.activities.MapsActivity;
 import com.davidremington.infiltratr.models.LocationMarker;
 import com.davidremington.infiltratr.R;
 
+import com.davidremington.infiltratr.services.FirebaseService;
 import com.google.android.gms.maps.model.LatLng;
 import org.parceler.Parcels;
 
@@ -22,6 +22,7 @@ import butterknife.ButterKnife;
 public class AddMarkerDialogFragment extends DialogFragment implements Button.OnClickListener {
 
     private static final String TAG = AddMarkerDialogFragment.class.getSimpleName();
+    private static FirebaseService mFirebaseService;
 
     private LatLng mLatLng;
     @Bind(R.id.titleEditText) EditText mTitleEditText;
@@ -41,6 +42,7 @@ public class AddMarkerDialogFragment extends DialogFragment implements Button.On
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        mFirebaseService = FirebaseService.getInstance();
         mLatLng = Parcels.unwrap(getArguments().getParcelable("latLng"));
     }
 
@@ -63,7 +65,7 @@ public class AddMarkerDialogFragment extends DialogFragment implements Button.On
                 Double latitude = mLatLng.latitude;
                 Double longitude = mLatLng.longitude;
                 LocationMarker locationMarker = new LocationMarker(latitude, longitude, title, description);
-                MapsActivity.saveLocationToFirebase(locationMarker);
+                mFirebaseService.saveLocationToFirebase(locationMarker);
                 AddMarkerDialogFragment.this.dismiss();
                 break;
             case R.id.cancelButton:
