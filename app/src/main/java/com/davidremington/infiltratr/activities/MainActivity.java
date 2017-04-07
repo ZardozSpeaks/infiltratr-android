@@ -22,17 +22,21 @@ public class MainActivity extends AppCompatActivity {
     @Bind(R.id.startButton) Button mStartButton;
     @Bind(R.id.titleTextView) TextView mTitleTextView;
 
+    private static final String FONT = "Rustico.ttf";
+    private static final String BACKGROUND_ROOT_URL = "http://i64.photobucket.com/albums/h164/hewhoiswithoutaname";
+    private static final String BACKGROUND_IMAGE = "background_zpsz298orhf.jpg";
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
         ButterKnife.bind(this);
 
-        Typeface myCustomFont = Typeface.createFromAsset(getAssets(), "Rustico.ttf");
+        Typeface myCustomFont = Typeface.createFromAsset(getAssets(), FONT);
         mTitleTextView.setTypeface(myCustomFont);
 
         Picasso.with(this)
-                .load("http://i64.photobucket.com/albums/h164/hewhoiswithoutaname/background_zpsz298orhf.jpg")
+                .load(getBackgroundUrl())
                 .resize(800, 500)
                 .centerCrop()
                 .into(mLandingPageImageView);
@@ -44,5 +48,9 @@ public class MainActivity extends AppCompatActivity {
                 startActivity(intent);
             }
         });
+    }
+
+    private String getBackgroundUrl() {
+        return String.format("%s/%s", BACKGROUND_ROOT_URL, BACKGROUND_IMAGE);
     }
 }
