@@ -14,13 +14,8 @@ import android.support.v4.content.ContextCompat;
 import android.view.View;
 import android.widget.Toast;
 
-import com.davidremington.infiltratr.models.LocationMarker;
-import com.davidremington.infiltratr.utils.Constants;
+import com.davidremington.infiltratr.services.FirebaseService;
 import com.davidremington.infiltratr.fragments.AddMarkerDialogFragment;
-import com.firebase.client.DataSnapshot;
-import com.firebase.client.Firebase;
-import com.firebase.client.FirebaseError;
-import com.firebase.client.ValueEventListener;
 import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.api.GoogleApiClient;
 import com.google.android.gms.location.LocationListener;
@@ -51,133 +46,30 @@ public class MapsActivity extends FragmentActivity implements
         GoogleMap.OnMapClickListener,
         GoogleMap.OnMarkerClickListener{
 
+    @Bind(R.id.fab) FloatingActionButton mFab;
+
     private GoogleMap mMap;
     private GoogleApiClient mGoogleApiClient;
     private LocationRequest mLocationRequest;
     private Location mLastLocation;
+    private static FirebaseService mFirebaseService;
+
     private static int mRefreshCount;
     private final static int CONNECTION_FAILURE_RESOLUTION_REQUEST = 9000;
-    @Bind(R.id.fab) FloatingActionButton mFab;
 
-    /* defines location request for onLocationChange,
-       locates map fragment,
-       issues callback for GoogleMap object*/
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_maps);
         mRefreshCount = 0;
-
-
-        mLocationRequest = LocationRequest.create()
-                .setPriority(LocationRequest.PRIORITY_HIGH_ACCURACY)
-                .setInterval(20000)
-                .setFastestInterval(5000);
+        mFirebaseService = FirebaseService.getInstance();
+        mLocationRequest = buildLocationRequest();
 
         SupportMapFragment mapFragment = (SupportMapFragment) getSupportFragmentManager()
                 .findFragmentById(R.id.map);
         mapFragment.getMapAsync(this);
-
     }
-
-    /* listens for the result of callback for GoogleMap object,
-       defines member variable as result of callback,
-       checks permissions then enables play location services
-       builds query then issues callback to play location services */
-
-    @Override
-    public void onMapReady(GoogleMap map) {
-        mMap = map;
-        ButterKnife.bind(this);
-
-        if (ContextCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION)
-                == PackageManager.PERMISSION_GRANTED) {
-            mMap.setMyLocationEnabled(true);
-
-        }
-        else {
-            String warning = "You must enable location services in app permissions to view this screen";
-            Toast.makeText(this, warning , Toast.LENGTH_LONG)
-                    .show();
-        }
-
-
-         /* allow user to drop pin on screen */
-
-        mFab.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                mMap.setOnMapClickListener(MapsActivity.this);
-                mMap.setOnMarkerClickListener(MapsActivity.this);
-
-            }
-        });
-
-    }
-
-    /* listens for results of callback to play services
-       checks permissions then checks for last known location
-       if last known location is void it calls the method that finds new location*/
-
-
-    @Override
-    public void onConnected(Bundle bundle) {
-        if (ContextCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION)
-                == PackageManager.PERMISSION_GRANTED) {
-            if(mLastLocation != null) {
-                mLastLocation = LocationServices.FusedLocationApi.getLastLocation(mGoogleApiClient);
-                handleNewLocation(mLastLocation);
-            } else {
-               startLocationUpdates();
-            }
-        }
-        else {
-            String warning = "You must enable location services in app permissions to view this screen";
-            Toast.makeText(this, warning , Toast.LENGTH_LONG)
-                    .show();
-        }
-    }
-
-    /* listens to see if connection to play services has been lost*/
-
-    @Override
-    public void onConnectionSuspended(int i) {
-        String warning = "Connection to play services has been lost";
-        Toast.makeText(this, warning , Toast.LENGTH_LONG)
-                .show();
-    }
-
-    /* listens to see if connection to play services fails and catches errors*/
-
-    @Override
-    public void onConnectionFailed(@NonNull ConnectionResult connectionResult) {
-        if (connectionResult.hasResolution()) {
-            try {
-                connectionResult.startResolutionForResult(this, CONNECTION_FAILURE_RESOLUTION_REQUEST);
-            } catch (IntentSender.SendIntentException e) {
-                e.printStackTrace();
-            }
-        } else {
-            String warning = "You must enable google play services in order to view this screen";
-            Toast.makeText(this, warning , Toast.LENGTH_LONG)
-                    .show();
-        }
-
-    }
-
-    /* listens for results of location update callback
-       redefines location member variable based on results
-       invokes location handler method to move center map view and zoom if first refresh*/
-
-    @Override
-    public void onLocationChanged(Location location) {
-        mLastLocation = location;
-            handleNewLocation(location);
-
-    }
-
-    /* handles activity lifestyle */
 
     @Override
     protected void onStart() {
@@ -192,7 +84,6 @@ public class MapsActivity extends FragmentActivity implements
         stopLocationUpdates();
     }
 
-
     @Override
     protected void onStop() {
         super.onStop();
@@ -201,33 +92,91 @@ public class MapsActivity extends FragmentActivity implements
         }
     }
 
-    /* centers the map view on update
-       zooms camera on 1st location update */
+    @Override
+    public void onMapReady(GoogleMap map) {
+        mMap = map;
+        ButterKnife.bind(this);
+
+        if (ContextCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION)
+                == PackageManager.PERMISSION_GRANTED) {
+            mMap.setMyLocationEnabled(true);
+        } else {
+            Toast.makeText(this, getString(R.string.location_services_warning), Toast.LENGTH_LONG)
+                    .show();
+        }
+
+        mFab.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                mMap.setOnMapClickListener(MapsActivity.this);
+                mMap.setOnMarkerClickListener(MapsActivity.this);
+
+            }
+        });
+
+    }
+
+
+    /*---------------------- PLAY SERVICES CONNECTION MANAGEMENT ----------------------*/
+
+
+    @Override
+    public void onConnected(Bundle bundle) {
+        if (ContextCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION)
+                == PackageManager.PERMISSION_GRANTED) {
+            if(mLastLocation != null) {
+                mLastLocation = LocationServices.FusedLocationApi.getLastLocation(mGoogleApiClient);
+                handleNewLocation(mLastLocation);
+            } else {
+               startLocationUpdates();
+            }
+        }
+        else {
+            Toast.makeText(this, getString(R.string.location_services_warning), Toast.LENGTH_LONG)
+                    .show();
+        }
+    }
+
+    @Override
+    public void onConnectionSuspended(int i) {
+        Toast.makeText(this, getString(R.string.connection_suspended) , Toast.LENGTH_LONG)
+                .show();
+    }
+
+    @Override
+    public void onConnectionFailed(@NonNull ConnectionResult connectionResult) {
+        if (connectionResult.hasResolution()) {
+            try {
+                connectionResult.startResolutionForResult(this, CONNECTION_FAILURE_RESOLUTION_REQUEST);
+            } catch (IntentSender.SendIntentException e) {
+                e.printStackTrace();
+            }
+        } else {
+            Toast.makeText(this, getString(R.string.location_services_warning) , Toast.LENGTH_LONG)
+                    .show();
+        }
+
+    }
+
+
+    /*----------------------------- LOCATION MANAGEMENT -------------------------------*/
+
+
+    @Override
+    public void onLocationChanged(Location location) {
+        mLastLocation = location;
+        handleNewLocation(location);
+
+    }
 
     private void handleNewLocation(Location location) {
-        double currentLatitude = location.getLatitude();
-        double currentLongitude = location.getLongitude();
-        LatLng latLng = new LatLng(currentLatitude, currentLongitude);
+        LatLng latLng = new LatLng(location.getLatitude(), location.getLongitude());
         if (mRefreshCount == 0) {
             mMap.animateCamera(CameraUpdateFactory.newLatLngZoom(latLng, 15.0f));
             mRefreshCount ++;
             drawLocations();
         }
     }
-
-    /* constructs the play services callback client*/
-
-    protected synchronized void buildGoogleApiClient() {
-
-        mGoogleApiClient = new GoogleApiClient.Builder(this)
-                .addConnectionCallbacks(this)
-                .addOnConnectionFailedListener(this)
-                .addApi(LocationServices.API)
-                .build();
-
-    }
-
-    /* issues callback to play services based on location request builder*/
 
     protected void startLocationUpdates() {
         if (ContextCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION)
@@ -236,14 +185,16 @@ public class MapsActivity extends FragmentActivity implements
         }
     }
 
-    /* end connection with play services to save batteries*/
-
     protected void stopLocationUpdates() {
         if (mGoogleApiClient != null) {
             LocationServices.FusedLocationApi.removeLocationUpdates(
                     mGoogleApiClient, this);
         }
     }
+
+
+    /*----------------------------- CLICK LISTENERS -------------------------------*/
+
 
     @Override
     public void onMapClick(LatLng latLng) {
@@ -258,41 +209,37 @@ public class MapsActivity extends FragmentActivity implements
 
     @Override
     public boolean onMarkerClick(Marker marker) {
-        final Marker currentMarker = marker;
         final Map coordinates = new HashMap();
-        Double lat = currentMarker.getPosition().latitude;
-        Double lng = currentMarker.getPosition().longitude;
+        Double lat = marker.getPosition().latitude;
+        Double lng = marker.getPosition().longitude;
         coordinates.put("latitude",lat);
         coordinates.put("longitude",lng);
         return false;
     }
 
-    public static void saveLocationToFirebase(LocationMarker locationMarker) {
-        Firebase savedLocationRef = new Firebase(Constants.FIREBASE_URL_SAVED_LOCATION);
-        savedLocationRef.push().setValue(locationMarker);
+    /*----------------------------- HELPER METHODS -------------------------------*/
+
+
+    private void drawLocations() {
+        MarkerOptions[] options = mFirebaseService.retreiveMarkersFromFirebase();
+        if(options[0] != null) {
+            mMap.addMarker(options[0]);
+        }
     }
 
-    public void drawLocations() {
-        Firebase savedLocationRef = new Firebase(Constants.FIREBASE_URL_SAVED_LOCATION);
-        savedLocationRef.addValueEventListener(new ValueEventListener() {
-            @Override
-            public void onDataChange(DataSnapshot snapshot) {
-                for(DataSnapshot postSnapshot: snapshot.getChildren() ) {
-                    Map data = (HashMap) postSnapshot.getValue();
-                    Double latitude = (Double) (data.get("latitude"));
-                    Double longitude = (Double) (data.get("longitude"));
-                    String title = (String)(data.get("locationTitle"));
-                    String snippet = (String)(data.get("snippet"));
-                    LocationMarker locationMarker = new LocationMarker(latitude, longitude, title, snippet);
-                    MarkerOptions options = locationMarker.buildLocationMarker();
-                    mMap.addMarker(options);
-                }
-            }
+    private synchronized void buildGoogleApiClient() {
+        mGoogleApiClient = new GoogleApiClient.Builder(this)
+                .addConnectionCallbacks(this)
+                .addOnConnectionFailedListener(this)
+                .addApi(LocationServices.API)
+                .build();
 
-            @Override
-            public void onCancelled(FirebaseError firebaseError) {
-                System.out.println("The read failed: " + firebaseError.getMessage());
-            }
-        });
+    }
+
+    private LocationRequest buildLocationRequest() {
+        return LocationRequest.create()
+                .setPriority(LocationRequest.PRIORITY_HIGH_ACCURACY)
+                .setInterval(20000)
+                .setFastestInterval(5000);
     }
 }
