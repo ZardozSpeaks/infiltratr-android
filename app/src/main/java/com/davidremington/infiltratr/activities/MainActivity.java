@@ -13,6 +13,7 @@ import com.squareup.picasso.Picasso;
 
 import butterknife.Bind;
 import butterknife.ButterKnife;
+import butterknife.OnClick;
 
 import com.davidremington.infiltratr.R;
 
@@ -41,13 +42,12 @@ public class MainActivity extends AppCompatActivity {
                 .centerCrop()
                 .into(mLandingPageImageView);
 
-        mStartButton.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                Intent intent = new Intent(MainActivity.this, MapsActivity.class);
-                startActivity(intent);
-            }
-        });
+    }
+
+    @OnClick(R.id.startButton)
+    public void onClick(View view) {
+        Intent intent = new Intent(MainActivity.this, MapsActivity.class);
+        startActivity(intent);
     }
 
     private String getBackgroundUrl() {

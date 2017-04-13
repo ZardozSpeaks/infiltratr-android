@@ -22,7 +22,7 @@ import butterknife.ButterKnife;
 public class AddMarkerDialogFragment extends DialogFragment implements Button.OnClickListener {
 
     private static final String TAG = AddMarkerDialogFragment.class.getSimpleName();
-    private static FirebaseService mFirebaseService;
+    private static FirebaseService sFirebaseService;
 
     private LatLng mLatLng;
     @Bind(R.id.titleEditText) EditText mTitleEditText;
@@ -42,7 +42,7 @@ public class AddMarkerDialogFragment extends DialogFragment implements Button.On
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        mFirebaseService = FirebaseService.getInstance();
+        sFirebaseService = FirebaseService.getInstance();
         mLatLng = Parcels.unwrap(getArguments().getParcelable("latLng"));
     }
 
@@ -65,7 +65,7 @@ public class AddMarkerDialogFragment extends DialogFragment implements Button.On
                 Double latitude = mLatLng.latitude;
                 Double longitude = mLatLng.longitude;
                 LocationMarker locationMarker = new LocationMarker(latitude, longitude, title, description);
-                mFirebaseService.saveLocationToFirebase(locationMarker);
+                sFirebaseService.saveLocationToFirebase(locationMarker);
                 AddMarkerDialogFragment.this.dismiss();
                 break;
             case R.id.cancelButton:

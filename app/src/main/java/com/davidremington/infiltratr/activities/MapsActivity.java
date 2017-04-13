@@ -52,9 +52,9 @@ public class MapsActivity extends FragmentActivity implements
     private GoogleApiClient mGoogleApiClient;
     private LocationRequest mLocationRequest;
     private Location mLastLocation;
-    private static FirebaseService mFirebaseService;
+    private int mRefreshCount;
+    private static FirebaseService sFirebaseService;
 
-    private static int mRefreshCount;
     private final static int CONNECTION_FAILURE_RESOLUTION_REQUEST = 9000;
 
 
@@ -63,7 +63,7 @@ public class MapsActivity extends FragmentActivity implements
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_maps);
         mRefreshCount = 0;
-        mFirebaseService = FirebaseService.getInstance();
+        sFirebaseService = FirebaseService.getInstance();
         mLocationRequest = buildLocationRequest();
 
         SupportMapFragment mapFragment = (SupportMapFragment) getSupportFragmentManager()
@@ -221,7 +221,7 @@ public class MapsActivity extends FragmentActivity implements
 
 
     private void drawLocations() {
-        MarkerOptions[] options = mFirebaseService.retreiveMarkersFromFirebase();
+        MarkerOptions[] options = sFirebaseService.retrieveMarkersFromFirebase();
         if(options[0] != null) {
             mMap.addMarker(options[0]);
         }

@@ -13,27 +13,27 @@ import java.util.HashMap;
 import java.util.Map;
 
 public class FirebaseService {
-    private static FirebaseService instance = null;
-    private static Firebase firebase = new Firebase(Constants.FIREBASE_URL_SAVED_LOCATION);
+    private static FirebaseService sInstance = null;
+    private static Firebase sFirebase = new Firebase(Constants.FIREBASE_URL_SAVED_LOCATION);
 
     public FirebaseService() {
         //method to prevent instantiation
     }
 
     public static FirebaseService getInstance() {
-        if(instance == null) {
-            instance = new FirebaseService();
+        if(sInstance == null) {
+            sInstance = new FirebaseService();
         }
-        return instance;
+        return sInstance;
     }
 
     public void saveLocationToFirebase(LocationMarker locationMarker) {
-        firebase.push().setValue(locationMarker);
+        sFirebase.push().setValue(locationMarker);
     }
 
-    public MarkerOptions[] retreiveMarkersFromFirebase() {
+    public MarkerOptions[] retrieveMarkersFromFirebase() {
         final MarkerOptions[] options = new MarkerOptions[1];
-        firebase.addValueEventListener(new ValueEventListener() {
+        sFirebase.addValueEventListener(new ValueEventListener() {
             @Override
             public void onDataChange(DataSnapshot snapshot) {
                 for (DataSnapshot postSnapshot : snapshot.getChildren()) {
