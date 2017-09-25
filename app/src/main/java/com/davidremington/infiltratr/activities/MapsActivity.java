@@ -9,6 +9,7 @@ import android.location.Location;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.design.widget.FloatingActionButton;
+import android.support.v4.app.ActivityCompat;
 import android.support.v4.app.FragmentActivity;
 import android.support.v4.content.ContextCompat;
 import android.view.View;
@@ -33,7 +34,7 @@ import com.google.android.gms.maps.model.MarkerOptions;
 import java.util.HashMap;
 import java.util.Map;
 
-import butterknife.Bind;
+import butterknife.BindView;
 import butterknife.ButterKnife;
 
 import com.davidremington.infiltratr.R;
@@ -46,7 +47,8 @@ public class MapsActivity extends FragmentActivity implements
         GoogleMap.OnMapClickListener,
         GoogleMap.OnMarkerClickListener{
 
-    @Bind(R.id.fab) FloatingActionButton mFab;
+
+    @BindView(R.id.fab) FloatingActionButton mFab;
 
     private GoogleMap mMap;
     private GoogleApiClient mGoogleApiClient;
@@ -55,8 +57,9 @@ public class MapsActivity extends FragmentActivity implements
     private int mRefreshCount;
     private static FirebaseService sFirebaseService;
 
-    private final static int CONNECTION_FAILURE_RESOLUTION_REQUEST = 9000;
-
+    private static final int CONNECTION_FAILURE_RESOLUTION_REQUEST = 9000;
+    private static final int PERMISSION_REQUEST_ACCESS_COARSE_LOCATION = 1814;
+    private static final int PERMISSION_REQUEST_ACCESS_FINE_LOCATION = 1776;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -65,10 +68,7 @@ public class MapsActivity extends FragmentActivity implements
         mRefreshCount = 0;
         sFirebaseService = FirebaseService.getInstance();
         mLocationRequest = buildLocationRequest();
-
-        SupportMapFragment mapFragment = (SupportMapFragment) getSupportFragmentManager()
-                .findFragmentById(R.id.map);
-        mapFragment.getMapAsync(this);
+        checkAppPermissions();
     }
 
     @Override
@@ -81,13 +81,15 @@ public class MapsActivity extends FragmentActivity implements
     @Override
     protected void onPause() {
         super.onPause();
-        stopLocationUpdates();
+        if(mGoogleApiClient != null && mGoogleApiClient.isConnected()) {
+            stopLocationUpdates();
+        }
     }
 
     @Override
     protected void onStop() {
         super.onStop();
-        if (mGoogleApiClient != null) {
+        if (mGoogleApiClient != null && mGoogleApiClient.isConnected()) {
             mGoogleApiClient.disconnect();
         }
     }
@@ -114,6 +116,27 @@ public class MapsActivity extends FragmentActivity implements
             }
         });
 
+    }
+
+    @Override
+    public void onRequestPermissionsResult(int requestCode, @NonNull String permissions[], @NonNull int[] grantResults) {
+        switch (requestCode) {
+            case PERMISSION_REQUEST_ACCESS_COARSE_LOCATION:
+                if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+                    break;
+                } else {
+                    //TODO: display error message to user
+                    break;
+                }
+            case PERMISSION_REQUEST_ACCESS_FINE_LOCATION:
+                if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+                    setSupportMapFragment();
+                    break;
+                } else {
+                    //TODO: display error message to user
+                    break;
+                }
+        }
     }
 
 
@@ -241,5 +264,28 @@ public class MapsActivity extends FragmentActivity implements
                 .setPriority(LocationRequest.PRIORITY_HIGH_ACCURACY)
                 .setInterval(20000)
                 .setFastestInterval(5000);
+    }
+
+    private void checkAppPermissions() {
+        if (ContextCompat.checkSelfPermission(this, Manifest.permission.ACCESS_COARSE_LOCATION)
+                != PackageManager.PERMISSION_GRANTED) {
+            ActivityCompat.requestPermissions(this,
+                    new String[]{Manifest.permission.ACCESS_COARSE_LOCATION},
+                    PERMISSION_REQUEST_ACCESS_COARSE_LOCATION);
+        }
+        if (ContextCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION)
+                != PackageManager.PERMISSION_GRANTED) {
+            ActivityCompat.requestPermissions(this,
+                    new String[]{Manifest.permission.ACCESS_FINE_LOCATION},
+                    PERMISSION_REQUEST_ACCESS_FINE_LOCATION);
+        } else {
+            setSupportMapFragment();
+        }
+    }
+
+    private void setSupportMapFragment() {
+        SupportMapFragment mapFragment = (SupportMapFragment) getSupportFragmentManager()
+                .findFragmentById(R.id.map);
+        mapFragment.getMapAsync(this);
     }
 }

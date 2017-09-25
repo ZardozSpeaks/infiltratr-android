@@ -16,7 +16,7 @@ import com.google.android.gms.maps.model.LatLng;
 import org.parceler.Parcels;
 
 
-import butterknife.Bind;
+import butterknife.BindView;
 import butterknife.ButterKnife;
 
 public class AddMarkerDialogFragment extends DialogFragment implements Button.OnClickListener {
@@ -25,10 +25,10 @@ public class AddMarkerDialogFragment extends DialogFragment implements Button.On
     private static FirebaseService sFirebaseService;
 
     private LatLng mLatLng;
-    @Bind(R.id.titleEditText) EditText mTitleEditText;
-    @Bind(R.id.descriptionEditText) EditText mDescriptionEditText;
-    @Bind(R.id.saveButton) Button mSaveButton;
-    @Bind(R.id.cancelButton) Button mCancelButton;
+    @BindView(R.id.titleEditText) EditText mTitleEditText;
+    @BindView(R.id.descriptionEditText) EditText mDescriptionEditText;
+    @BindView(R.id.saveButton) Button mSaveButton;
+    @BindView(R.id.cancelButton) Button mCancelButton;
 
 
     public static AddMarkerDialogFragment newInstance (LatLng latLng) {
