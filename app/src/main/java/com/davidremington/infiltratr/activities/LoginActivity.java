@@ -2,7 +2,6 @@ package com.davidremington.infiltratr.activities;
 
 import android.content.Intent;
 import android.graphics.Typeface;
-import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.view.View;
 import android.widget.Button;
@@ -17,13 +16,13 @@ import butterknife.OnClick;
 
 import com.davidremington.infiltratr.R;
 
-public class LoginActivity extends AppCompatActivity {
+public class LoginActivity extends BaseActivity {
 
-    @BindView(R.id.landingPageImageView) ImageView landingPageBackgroundImage;
-    @BindView(R.id.startButton) Button mStartButton;
-    @BindView(R.id.titleTextView) TextView mTitleTextView;
+    @BindView(R.id.loginPageImageView) ImageView loginPageBackgroundImage;
+    @BindView(R.id.startButton) Button startButton;
+    @BindView(R.id.titleTextView) TextView titleText;
 
-    private static final String FONT = "Rustico.ttf";
+    private static final String TITLE_FONT = "Rustico.ttf";
     private static final String BACKGROUND_ROOT_URL = "http://i64.photobucket.com/albums/h164/hewhoiswithoutaname";
     private static final String BACKGROUND_IMAGE = "background_zpsz298orhf.jpg";
 
@@ -33,14 +32,14 @@ public class LoginActivity extends AppCompatActivity {
         setContentView(R.layout.activity_login);
         ButterKnife.bind(this);
 
-        Typeface myCustomFont = Typeface.createFromAsset(getAssets(), FONT);
-        mTitleTextView.setTypeface(myCustomFont);
+        Typeface titleTextFont = Typeface.createFromAsset(getAssets(), TITLE_FONT);
+        titleText.setTypeface(titleTextFont);
 
         Picasso.with(this)
                 .load(getBackgroundUrl())
                 .resize(800, 500)
                 .centerCrop()
-                .into(landingPageBackgroundImage);
+                .into(loginPageBackgroundImage);
 
     }
 
