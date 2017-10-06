@@ -12,6 +12,8 @@ import com.google.android.gms.maps.model.MarkerOptions;
 import java.util.HashMap;
 import java.util.Map;
 
+import rx.subjects.Subject;
+
 public class FirebaseService {
     private static FirebaseService sInstance = null;
     private static Firebase sFirebase = new Firebase(Constants.FIREBASE_URL_SAVED_LOCATION);
@@ -31,8 +33,7 @@ public class FirebaseService {
         sFirebase.push().setValue(locationMarker);
     }
 
-    public MarkerOptions[] retrieveMarkersFromFirebase() {
-        final MarkerOptions[] options = new MarkerOptions[1];
+    public void retrieveMarkersFromFirebase(Subject<MarkerOptions, MarkerOptions> updateObserver) {
         sFirebase.addValueEventListener(new ValueEventListener() {
             @Override
             public void onDataChange(DataSnapshot snapshot) {
@@ -43,7 +44,8 @@ public class FirebaseService {
                     String title = (String) (data.get("locationTitle"));
                     String snippet = (String) (data.get("snippet"));
                     LocationMarker locationMarker = new LocationMarker(latitude, longitude, title, snippet);
-                    options[0] = locationMarker.buildLocationMarker();
+                    MarkerOptions currentOption = locationMarker.buildLocationMarker();
+                    updateObserver.onNext(currentOption);
                 }
             }
 
@@ -52,6 +54,5 @@ public class FirebaseService {
                 System.out.println("The read failed: " + firebaseError.getMessage());
             }
         });
-        return options;
     }
 }

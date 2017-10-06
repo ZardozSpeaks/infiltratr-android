@@ -34,8 +34,14 @@ import com.google.android.gms.maps.model.MarkerOptions;
 import java.util.HashMap;
 import java.util.Map;
 
+import rx.android.schedulers.AndroidSchedulers;
+import rx.schedulers.Schedulers;
+import rx.subjects.PublishSubject;
+import rx.subjects.Subject;
+
 import butterknife.BindView;
 import butterknife.ButterKnife;
+import timber.log.Timber;
 
 import com.davidremington.infiltratr.R;
 
@@ -230,10 +236,16 @@ public class MapsActivity extends FragmentActivity implements
 
 
     private void drawLocations() {
-        MarkerOptions[] options = firebaseService.retrieveMarkersFromFirebase();
-        if(options[0] != null) {
-            map.addMarker(options[0]);
-        }
+        Subject<MarkerOptions, MarkerOptions> updateObserver = PublishSubject.create();
+        updateObserver.subscribeOn(Schedulers.newThread())
+                .observeOn(AndroidSchedulers.mainThread())
+                .subscribe((MarkerOptions option) -> {
+                    if(option != null) {
+                        map.addMarker(option);
+                    }
+                }, Timber::e);
+        firebaseService.retrieveMarkersFromFirebase(updateObserver);
+
     }
 
     private synchronized void buildGoogleApiClient() {
