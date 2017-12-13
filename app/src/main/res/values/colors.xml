@@ -4,4 +4,6 @@
     <color name="colorPrimaryDark">#990000</color>
     <color name="colorAccent">#607D8B</color>
     <color name="colorText">#ffffff</color>
+    <color name="fragmentBtnBackground">#fffafafa</color>
+    <color name="fragmentBtnText">#ff5a595b</color>
 </resources>

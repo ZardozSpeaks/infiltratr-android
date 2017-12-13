@@ -3,13 +3,13 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     xmlns:tools="http://schemas.android.com/tools"
-    tools:context=".Activities.MapsActivity">
+    tools:context=".activities.MapsActivity">
 
     <TextView
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:textAppearance="?android:attr/textAppearanceLarge"
-        android:text="Add a Location?"
+        android:text="@string/add_marker_title"
         android:id="@+id/titleTextView"
         android:layout_alignParentTop="true"
         android:layout_centerHorizontal="true"
@@ -33,7 +33,7 @@
         <EditText
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:hint="Title"
+            android:hint="@string/add_marker_title_hint"
             android:id="@+id/titleEditText"/>
 
         <EditText
@@ -42,7 +42,7 @@
             android:inputType="textMultiLine"
             android:ems="10"
             android:id="@+id/descriptionEditText"
-            android:hint="Description"/>
+            android:hint="@string/add_marker_description_hint"/>
 
     </LinearLayout>
 
@@ -54,22 +54,14 @@
         android:layout_centerHorizontal="true">
 
         <Button
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="Cancel"
-            android:id="@+id/cancelButton"
-            android:layout_weight="1"
-            android:background="@color/background_material_light"
-            android:textColor="@color/button_material_dark" />
+            style="@style/FragmentButtonStyle"
+            android:text="@string/cancel_btn_txt"
+            android:id="@+id/cancelButton"/>
 
         <Button
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="Save"
-            android:id="@+id/saveButton"
-            android:layout_weight="1"
-            android:background="@color/background_material_light"
-            android:textColor="@color/button_material_dark" />
+            style="@style/FragmentButtonStyle"
+            android:text="@string/save_btn_txt"
+            android:id="@+id/saveButton" />
     </LinearLayout>
 
 

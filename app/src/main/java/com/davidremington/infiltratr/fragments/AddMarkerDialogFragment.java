@@ -21,7 +21,6 @@ import butterknife.ButterKnife;
 
 public class AddMarkerDialogFragment extends DialogFragment implements Button.OnClickListener {
 
-    private static final String TAG = AddMarkerDialogFragment.class.getSimpleName();
     private static FirebaseService sFirebaseService;
 
     private LatLng mLatLng;
