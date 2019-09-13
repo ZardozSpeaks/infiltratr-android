@@ -3,25 +3,27 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    tools:context=".Activities.MainActivity">
+    tools:context=".activities.LoginActivity">
 
     <ImageView
         android:layout_width="fill_parent"
         android:layout_height="fill_parent"
         android:id="@+id/loginPageImageView"
         android:layout_alignParentTop="true"
-        android:layout_alignLeft="@+id/startButton"
         android:layout_alignStart="@+id/startButton"
-        android:scaleType="centerCrop" />
+        android:scaleType="centerCrop"
+        android:src="@drawable/login_background"
+        android:contentDescription="@string/login_background_description"/>
 
     <TextView
+        android:id="@+id/titleTextView"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:textAppearance="?android:attr/textAppearanceLarge"
-        android:text="Infiltratr"
+        android:text="@string/app_title"
+        android:fontFamily="@font/rustico"
         android:textColor="@color/colorText"
         android:textSize="62sp"
-        android:id="@+id/titleTextView"
         android:layout_marginTop="45dp"
         android:layout_alignParentTop="true"
         android:layout_centerHorizontal="true" />
@@ -29,7 +31,7 @@
     <Button
         android:layout_width="fill_parent"
         android:layout_height="55dp"
-        android:text="Go Exploring"
+        android:text="@string/go_exploring_btn_text"
         android:textSize="16sp"
         android:id="@+id/startButton"
         android:background="@color/colorPrimaryDark"
@@ -41,11 +43,10 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:textAppearance="?android:attr/textAppearanceSmall"
-        android:text="WARNING! Infiltratr is for entertainment purposes only. Do not violate state or local trespassing laws!"
+        android:text="@string/disclaimer_text"
         android:id="@+id/warningTextView"
-        android:drawableLeft="@drawable/ic_warning_white_24dp"
+        android:drawableStart="@drawable/ic_warning_white_24dp"
         android:layout_above="@+id/startButton"
-        android:layout_alignParentLeft="true"
         android:layout_alignParentStart="true"
         android:layout_marginBottom="45dp"
         android:layout_marginStart="25dp"

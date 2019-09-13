@@ -8,19 +8,24 @@ import android.content.IntentSender;
 import android.content.pm.PackageManager;
 import android.location.Location;
 import android.os.Bundle;
-import android.support.annotation.NonNull;
-import android.support.design.widget.FloatingActionButton;
-import android.support.v4.app.ActivityCompat;
-import android.support.v4.app.FragmentActivity;
-import android.support.v4.content.ContextCompat;
+import androidx.annotation.NonNull;
+import androidx.core.app.ActivityCompat;
+import androidx.fragment.app.FragmentActivity;
+import androidx.core.content.ContextCompat;
+
+import android.os.Looper;
 import android.widget.Toast;
 
 import com.davidremington.infiltratr.services.FirebaseService;
 import com.davidremington.infiltratr.fragments.AddMarkerDialogFragment;
 
+import com.google.android.gms.location.FusedLocationProviderClient;
+import com.google.android.gms.location.LocationCallback;
+import com.google.android.gms.location.LocationResult;
+import com.google.android.material.floatingactionbutton.FloatingActionButton;
+
 import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.api.GoogleApiClient;
-import com.google.android.gms.location.LocationListener;
 import com.google.android.gms.location.LocationRequest;
 import com.google.android.gms.location.LocationServices;
 import com.google.android.gms.maps.CameraUpdateFactory;
@@ -49,7 +54,6 @@ public class MapsActivity extends FragmentActivity implements
         OnMapReadyCallback,
         GoogleApiClient.ConnectionCallbacks,
         GoogleApiClient.OnConnectionFailedListener,
-        LocationListener,
         GoogleMap.OnMapClickListener,
         GoogleMap.OnMarkerClickListener{
 
@@ -62,6 +66,17 @@ public class MapsActivity extends FragmentActivity implements
     private Location currentLocation;
     private int refreshCounter;
     private static FirebaseService firebaseService;
+    private FusedLocationProviderClient fusedLocationClient;
+
+    private LocationCallback locationCallback = new LocationCallback() {
+        @Override
+        public void onLocationResult(LocationResult locationResult) {
+            if (locationResult == null) { return; }
+            currentLocation = locationResult.getLastLocation();
+            handleNewLocation(currentLocation);
+        }
+    };
+
 
     private static final int CONNECTION_FAILURE_RESOLUTION_REQUEST = 9000;
     private static final int PERMISSION_REQUEST_ACCESS_FINE_LOCATION = 1776;
@@ -72,10 +87,12 @@ public class MapsActivity extends FragmentActivity implements
         setContentView(R.layout.activity_maps);
         refreshCounter = 0;
         firebaseService = FirebaseService.getInstance();
+        fusedLocationClient = LocationServices.getFusedLocationProviderClient(this);
         locationRequest = buildLocationRequest();
         SupportMapFragment mapFragment = (SupportMapFragment) getSupportFragmentManager()
                 .findFragmentById(R.id.map);
-        mapFragment.getMapAsync(this);
+        if (mapFragment != null)
+            mapFragment.getMapAsync(this);
     }
 
     @Override
@@ -116,18 +133,15 @@ public class MapsActivity extends FragmentActivity implements
     }
 
     @Override
-    public void onRequestPermissionsResult(int requestCode, @NonNull String permissions[], @NonNull int[] grantResults) {
-        switch (requestCode) {
-            case PERMISSION_REQUEST_ACCESS_FINE_LOCATION:
-                if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
-                    connectToGoogleApiClient();
-                    break;
-                } else {
-                    Toast.makeText(this,
-                            getString(R.string.location_services_warning),
-                            Toast.LENGTH_LONG).show();
-                    break;
-                }
+    public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
+        if (requestCode == PERMISSION_REQUEST_ACCESS_FINE_LOCATION) {
+            if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+                connectToGoogleApiClient();
+            } else {
+                Toast.makeText(this,
+                        getString(R.string.location_services_warning),
+                        Toast.LENGTH_LONG).show();
+            }
         }
     }
 
@@ -139,12 +153,13 @@ public class MapsActivity extends FragmentActivity implements
     public void onConnected(Bundle bundle) {
         if (ContextCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION)
                 == PackageManager.PERMISSION_GRANTED) {
-            if(currentLocation != null) {
-                currentLocation = LocationServices.FusedLocationApi.getLastLocation(googleApiClient);
-                handleNewLocation(currentLocation);
-            } else {
-               startLocationUpdates();
-            }
+            fusedLocationClient.getLastLocation().addOnSuccessListener(this, location -> {
+                if(currentLocation != null) {
+                    currentLocation = location;
+                } else {
+                    startLocationUpdates();
+                }
+            });
         }
         else {
             Toast.makeText(this, getString(R.string.location_services_warning), Toast.LENGTH_LONG)
@@ -173,17 +188,6 @@ public class MapsActivity extends FragmentActivity implements
 
     }
 
-
-    /*----------------------------- LOCATION MANAGEMENT -------------------------------*/
-
-
-    @Override
-    public void onLocationChanged(Location location) {
-        currentLocation = location;
-        handleNewLocation(location);
-
-    }
-
     private void handleNewLocation(Location location) {
         LatLng latLng = new LatLng(location.getLatitude(), location.getLongitude());
         if (refreshCounter == 0) {
@@ -196,14 +200,13 @@ public class MapsActivity extends FragmentActivity implements
     protected void startLocationUpdates() {
         if (ContextCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION)
                 == PackageManager.PERMISSION_GRANTED) {
-            LocationServices.FusedLocationApi.requestLocationUpdates(googleApiClient, locationRequest, this);
+            fusedLocationClient.requestLocationUpdates(locationRequest, locationCallback, Looper.getMainLooper());
         }
     }
 
     protected void stopLocationUpdates() {
-        if (googleApiClient != null) {
-            LocationServices.FusedLocationApi.removeLocationUpdates(
-                    googleApiClient, this);
+        if (fusedLocationClient != null) {
+            fusedLocationClient.removeLocationUpdates(locationCallback);
         }
     }
 
