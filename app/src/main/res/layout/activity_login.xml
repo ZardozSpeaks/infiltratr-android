@@ -22,7 +22,7 @@
         android:textAppearance="?android:attr/textAppearanceLarge"
         android:text="@string/app_title"
         android:fontFamily="@font/rustico"
-        android:textColor="@color/colorText"
+        android:textColor="@color/color_text"
         android:textSize="62sp"
         android:layout_marginTop="45dp"
         android:layout_alignParentTop="true"
@@ -35,7 +35,7 @@
         android:textSize="16sp"
         android:id="@+id/startButton"
         android:background="@color/colorPrimaryDark"
-        android:textColor="@color/colorText"
+        android:textColor="@color/color_text"
         android:layout_alignParentBottom="true"
         android:layout_centerHorizontal="true" />
 
@@ -53,7 +53,7 @@
         android:layout_marginLeft="25dp"
         android:layout_marginEnd="25dp"
         android:layout_marginRight="25dp"
-        android:textColor="@color/colorText"
+        android:textColor="@color/color_text"
         android:textStyle="bold"
         android:layout_gravity="start"
         android:drawablePadding="10dp"

@@ -12,10 +12,16 @@
     <string name="add_marker_description_hint">Description</string>
 
     <!--Warning Messages-->
-    <string name="location_services_warning">You must enable location services in app permissions to view this screen"</string>
+    <string name="alert_location_services_message">Infiltratr uses your location to display and catalog urban exploring opportunities near you. Please enable the \"Location\" permission to view this screen."</string>
     <string name="connection_suspended">"Connection to Play Services has been lost"</string>
     <string name="app_title">Infiltratr</string>
     <string name="go_exploring_btn_text">Go Exploring</string>
     <string name="disclaimer_text">WARNING! Infiltratr is for entertainment purposes only. Do not violate state or local trespassing laws!</string>
     <string name="login_background_description">An image of an abandoned subway depot</string>
+
+    <string name="map_disabled_explanation">Please enable the \"Location\" permission to view the map.</string>
+    <string name="location_services_btn_text">Enable Location Services</string>
+    <string name="alert_location_services_title">Location Permission Disabled</string>
+    <string name="btn_settings_txt">Settings</string>
+    <string name="btn_cancel_text">Cancel</string>
 </resources>

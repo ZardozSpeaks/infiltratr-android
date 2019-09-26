@@ -14,7 +14,7 @@
         android:layout_alignParentTop="true"
         android:layout_centerHorizontal="true"
         android:textAlignment="center"
-        android:textColor="@color/colorText"
+        android:textColor="@color/color_text"
         android:background="@color/colorPrimaryDark"
         android:padding="10dp"/>
 
@@ -34,7 +34,9 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:hint="@string/add_marker_title_hint"
-            android:id="@+id/titleEditText"/>
+            android:id="@+id/titleEditText"
+            android:importantForAutofill="no"
+            android:inputType="text" />
 
         <EditText
             android:layout_width="match_parent"
@@ -42,7 +44,8 @@
             android:inputType="textMultiLine"
             android:ems="10"
             android:id="@+id/descriptionEditText"
-            android:hint="@string/add_marker_description_hint"/>
+            android:hint="@string/add_marker_description_hint"
+            android:importantForAutofill="no" />
 
     </LinearLayout>
 

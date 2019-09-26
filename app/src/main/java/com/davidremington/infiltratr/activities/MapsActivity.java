@@ -2,20 +2,25 @@ package com.davidremington.infiltratr.activities;
 
 
 import android.Manifest;
-import android.app.Fragment;
-import android.app.FragmentManager;
+import android.app.AlertDialog;
+import android.content.Intent;
 import android.content.IntentSender;
 import android.content.pm.PackageManager;
 import android.location.Location;
+import android.net.Uri;
 import android.os.Bundle;
 import androidx.annotation.NonNull;
 import androidx.core.app.ActivityCompat;
+import androidx.fragment.app.Fragment;
 import androidx.fragment.app.FragmentActivity;
 import androidx.core.content.ContextCompat;
+import androidx.fragment.app.FragmentManager;
 
 import android.os.Looper;
+import android.provider.Settings;
 import android.widget.Toast;
 
+import com.davidremington.infiltratr.fragments.MapDisabledFragment;
 import com.davidremington.infiltratr.services.FirebaseService;
 import com.davidremington.infiltratr.fragments.AddMarkerDialogFragment;
 
@@ -50,12 +55,16 @@ import timber.log.Timber;
 
 import com.davidremington.infiltratr.R;
 
+import static com.davidremington.infiltratr.utils.Constants.MAP_DISABLED_FRAGMENT_TAG;
+import static com.davidremington.infiltratr.utils.Constants.MAP_FRAGMENT;
+
 public class MapsActivity extends FragmentActivity implements
         OnMapReadyCallback,
         GoogleApiClient.ConnectionCallbacks,
         GoogleApiClient.OnConnectionFailedListener,
         GoogleMap.OnMapClickListener,
-        GoogleMap.OnMarkerClickListener{
+        GoogleMap.OnMarkerClickListener,
+        MapDisabledFragment.OnMapDisabledFragmentInteractionListener {
 
 
     @BindView(R.id.addMarkerFab) FloatingActionButton addMarkerFab;
@@ -89,10 +98,9 @@ public class MapsActivity extends FragmentActivity implements
         firebaseService = FirebaseService.getInstance();
         fusedLocationClient = LocationServices.getFusedLocationProviderClient(this);
         locationRequest = buildLocationRequest();
-        SupportMapFragment mapFragment = (SupportMapFragment) getSupportFragmentManager()
-                .findFragmentById(R.id.map);
-        if (mapFragment != null)
-            mapFragment.getMapAsync(this);
+        SupportMapFragment mapFragment = new SupportMapFragment();
+        addFragmentToTop(mapFragment, MAP_FRAGMENT);
+        mapFragment.getMapAsync(this);
     }
 
     @Override
@@ -138,16 +146,31 @@ public class MapsActivity extends FragmentActivity implements
             if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
                 connectToGoogleApiClient();
             } else {
-                Toast.makeText(this,
-                        getString(R.string.location_services_warning),
-                        Toast.LENGTH_LONG).show();
+                boolean shouldShowRationale = ActivityCompat.shouldShowRequestPermissionRationale(this, permissions[0]);
+                if (!shouldShowRationale) {
+                    addFragmentToTop(new MapDisabledFragment(), MAP_DISABLED_FRAGMENT_TAG);
+                    addMarkerFab.hide();
+                } else {
+                    new AlertDialog.Builder(this)
+                            .setTitle(R.string.alert_location_services_title)
+                            .setMessage(R.string.alert_location_services_message)
+                            .setPositiveButton(R.string.btn_settings_txt,
+                                    (dialog, which) -> {
+                                        Intent intent = new Intent(Settings.ACTION_APPLICATION_DETAILS_SETTINGS);
+                                        Uri uri = Uri.fromParts("package", getPackageName(), null);
+                                        intent.setData(uri);
+                                        startActivityForResult(intent, 0);
+                                    })
+                            .setNegativeButton(R.string.btn_cancel_text,
+                                    ((dialog, which) -> {
+                                        addFragmentToTop(new MapDisabledFragment(), MAP_DISABLED_FRAGMENT_TAG);
+                                        addMarkerFab.hide();
+                                    }))
+                            .show();
+                }
             }
         }
     }
-
-
-    /*---------------------- PLAY SERVICES CONNECTION MANAGEMENT ----------------------*/
-
 
     @Override
     public void onConnected(Bundle bundle) {
@@ -162,7 +185,7 @@ public class MapsActivity extends FragmentActivity implements
             });
         }
         else {
-            Toast.makeText(this, getString(R.string.location_services_warning), Toast.LENGTH_LONG)
+            Toast.makeText(this, getString(R.string.alert_location_services_message), Toast.LENGTH_LONG)
                     .show();
         }
     }
@@ -182,7 +205,7 @@ public class MapsActivity extends FragmentActivity implements
                 e.printStackTrace();
             }
         } else {
-            Toast.makeText(this, getString(R.string.location_services_warning) , Toast.LENGTH_LONG)
+            Toast.makeText(this, getString(R.string.alert_location_services_message) , Toast.LENGTH_LONG)
                     .show();
         }
 
@@ -210,13 +233,9 @@ public class MapsActivity extends FragmentActivity implements
         }
     }
 
-
-    /*----------------------------- CLICK LISTENERS -------------------------------*/
-
-
     @Override
     public void onMapClick(LatLng latLng) {
-        FragmentManager manager = getFragmentManager();
+        FragmentManager manager = getSupportFragmentManager();
         Fragment frag = manager.findFragmentByTag("fragment_add_marker");
         if (frag != null) {
             manager.beginTransaction().remove(frag).commit();
@@ -234,9 +253,6 @@ public class MapsActivity extends FragmentActivity implements
         coordinates.put("longitude",lng);
         return false;
     }
-
-    /*----------------------------- HELPER METHODS -------------------------------*/
-
 
     private void drawLocations() {
         Subject<MarkerOptions, MarkerOptions> updateObserver = PublishSubject.create();
@@ -281,5 +297,29 @@ public class MapsActivity extends FragmentActivity implements
     private void connectToGoogleApiClient() {
         buildGoogleApiClient();
         googleApiClient.connect();
+    }
+
+    private void addFragmentToTop(Fragment fragment, String tab) {
+        getSupportFragmentManager()
+                .beginTransaction()
+                .replace(R.id.fragment_container, fragment)
+                .addToBackStack(tab)
+                .commit();
+    }
+
+    private void popFragmentFromTop() {
+        androidx.fragment.app.FragmentManager fragmentManager = getSupportFragmentManager();
+        if (fragmentManager.getBackStackEntryCount() > 0) {
+            fragmentManager.popBackStack();
+        }
+    }
+
+    @Override
+    public void onUserReturnedFromSettings() {
+        if (ContextCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION)
+                == PackageManager.PERMISSION_GRANTED) {
+            popFragmentFromTop();
+            addMarkerFab.show();
+        }
     }
 }

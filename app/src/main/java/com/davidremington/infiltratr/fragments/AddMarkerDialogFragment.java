@@ -1,12 +1,14 @@
 package com.davidremington.infiltratr.fragments;
 
-import android.app.DialogFragment;
+
 import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.EditText;
+
+import androidx.fragment.app.DialogFragment;
 
 import com.davidremington.infiltratr.models.LocationMarker;
 import com.davidremington.infiltratr.R;
@@ -42,7 +44,8 @@ public class AddMarkerDialogFragment extends DialogFragment implements Button.On
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         sFirebaseService = FirebaseService.getInstance();
-        mLatLng = Parcels.unwrap(getArguments().getParcelable("latLng"));
+        if (getArguments() != null)
+            mLatLng = Parcels.unwrap(getArguments().getParcelable("latLng"));
     }
 
     @Override
