@@ -1,11 +1,9 @@
 package com.davidremington.infiltratr.fragments;
 
-
 import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.Button;
 import android.widget.EditText;
 
 import androidx.fragment.app.DialogFragment;
@@ -17,25 +15,25 @@ import com.davidremington.infiltratr.services.FirebaseService;
 import com.google.android.gms.maps.model.LatLng;
 import org.parceler.Parcels;
 
-
 import butterknife.BindView;
 import butterknife.ButterKnife;
+import butterknife.OnClick;
 
-public class AddMarkerDialogFragment extends DialogFragment implements Button.OnClickListener {
 
-    private static FirebaseService sFirebaseService;
+public class AddMarkerDialogFragment extends DialogFragment {
 
-    private LatLng mLatLng;
-    @BindView(R.id.titleEditText) EditText mTitleEditText;
-    @BindView(R.id.descriptionEditText) EditText mDescriptionEditText;
-    @BindView(R.id.saveButton) Button mSaveButton;
-    @BindView(R.id.cancelButton) Button mCancelButton;
+    private static FirebaseService firebaseService;
+    private static final String ARGUMENT_LAT_LNG = "latLng";
 
+    @BindView(R.id.titleEditText) EditText titleEditText;
+    @BindView(R.id.descriptionEditText) EditText descriptionEditText;
+
+    private LatLng latLng;
 
     public static AddMarkerDialogFragment newInstance (LatLng latLng) {
         AddMarkerDialogFragment addMarkerDialogFragment = new AddMarkerDialogFragment();
         Bundle args = new Bundle();
-        args.putParcelable("latLng", Parcels.wrap(latLng));
+        args.putParcelable(ARGUMENT_LAT_LNG, Parcels.wrap(latLng));
         addMarkerDialogFragment.setArguments(args);
         return addMarkerDialogFragment;
     }
@@ -43,38 +41,34 @@ public class AddMarkerDialogFragment extends DialogFragment implements Button.On
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        sFirebaseService = FirebaseService.getInstance();
-        if (getArguments() != null)
-            mLatLng = Parcels.unwrap(getArguments().getParcelable("latLng"));
+        firebaseService = FirebaseService.getInstance();
+        Bundle args = getArguments();
+        if (args != null) {
+            latLng = Parcels.unwrap(args.getParcelable(ARGUMENT_LAT_LNG));
+        }
     }
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         View view = inflater.inflate(R.layout.fragment_add_marker, container, false);
         ButterKnife.bind(this, view);
-        mSaveButton.setOnClickListener(this);
-        mCancelButton.setOnClickListener(this);
-        mTitleEditText.requestFocus();
+        titleEditText.requestFocus();
         return view;
     }
 
-    @Override
-    public void onClick(View view) {
-        switch (view.getId()) {
-            case R.id.saveButton:
-                String title = mTitleEditText.getText().toString();
-                String description = mDescriptionEditText.getText().toString();
-                Double latitude = mLatLng.latitude;
-                Double longitude = mLatLng.longitude;
-                LocationMarker locationMarker = new LocationMarker(latitude, longitude, title, description);
-                sFirebaseService.saveLocationToFirebase(locationMarker);
-                AddMarkerDialogFragment.this.dismiss();
-                break;
-            case R.id.cancelButton:
-                AddMarkerDialogFragment.this.dismiss();
-                break;
-        }
-
+    @OnClick(R.id.cancelButton)
+    void onCancelButtonClicked() {
+        this.dismiss();
     }
 
+    @OnClick(R.id.saveButton)
+    void onSaveButtonClicked() {
+        String title = titleEditText.getText().toString();
+        String description = descriptionEditText.getText().toString();
+        Double latitude = latLng.latitude;
+        Double longitude = latLng.longitude;
+        LocationMarker locationMarker = new LocationMarker(latitude, longitude, title, description);
+        firebaseService.saveLocationToFirebase(locationMarker);
+        this.dismiss();
+    }
 }
