@@ -8,6 +8,8 @@ import com.firebase.client.Firebase;
 import com.firebase.client.FirebaseError;
 import com.firebase.client.ValueEventListener;
 import com.google.android.gms.maps.model.MarkerOptions;
+import com.google.firebase.database.DatabaseReference;
+import com.google.firebase.database.FirebaseDatabase;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -54,5 +56,9 @@ public class FirebaseService {
                 System.out.println("The read failed: " + firebaseError.getMessage());
             }
         });
+    }
+
+    public DatabaseReference getLoggingDatabaseReference(String date, String deviceId) {
+        return FirebaseDatabase.getInstance().getReference(String.format("logs/%s/%s", date, deviceId));
     }
 }

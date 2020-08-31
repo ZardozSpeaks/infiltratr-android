@@ -54,9 +54,6 @@ import timber.log.Timber;
 
 import com.davidremington.infiltratr.R;
 
-import static com.davidremington.infiltratr.utils.Constants.MAP_DISABLED_FRAGMENT_TAG;
-import static com.davidremington.infiltratr.utils.Constants.MAP_FRAGMENT;
-
 
 public class MapsActivity extends FragmentActivity implements
         OnMapReadyCallback,
@@ -68,6 +65,9 @@ public class MapsActivity extends FragmentActivity implements
 
 
     @BindView(R.id.addMarkerFab) FloatingActionButton addMarkerFab;
+
+    public static final String MAP_DISABLED_FRAGMENT_TAG = "MAP_DISABLED_FRAGMENT_TAG";
+    public static final String MAP_FRAGMENT = "MAP_FRAGMENT";
 
     private GoogleMap map;
     private GoogleApiClient googleApiClient;
