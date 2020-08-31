@@ -1,6 +1,5 @@
 package com.davidremington.infiltratr.activities;
 
-
 import android.Manifest;
 import android.app.AlertDialog;
 import android.content.Intent;
@@ -57,6 +56,7 @@ import com.davidremington.infiltratr.R;
 
 import static com.davidremington.infiltratr.utils.Constants.MAP_DISABLED_FRAGMENT_TAG;
 import static com.davidremington.infiltratr.utils.Constants.MAP_FRAGMENT;
+
 
 public class MapsActivity extends FragmentActivity implements
         OnMapReadyCallback,

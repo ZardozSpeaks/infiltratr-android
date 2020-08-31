@@ -15,30 +15,30 @@ import java.util.Map;
 import rx.subjects.Subject;
 
 public class FirebaseService {
-    private static FirebaseService sInstance = null;
-    private static Firebase sFirebase = new Firebase(Constants.FIREBASE_URL_SAVED_LOCATION);
+    private static FirebaseService instance = null;
+    private static Firebase firebase = new Firebase(Constants.FIREBASE_URL_SAVED_LOCATION);
 
     public FirebaseService() {
         //method to prevent instantiation
     }
 
     public static FirebaseService getInstance() {
-        if(sInstance == null) {
-            sInstance = new FirebaseService();
+        if(instance == null) {
+            instance = new FirebaseService();
         }
-        return sInstance;
+        return instance;
     }
 
     public void saveLocationToFirebase(LocationMarker locationMarker) {
-        sFirebase.push().setValue(locationMarker);
+        firebase.push().setValue(locationMarker);
     }
 
     public void retrieveMarkersFromFirebase(Subject<MarkerOptions, MarkerOptions> updateObserver) {
-        sFirebase.addValueEventListener(new ValueEventListener() {
+        firebase.addValueEventListener(new ValueEventListener() {
             @Override
             public void onDataChange(DataSnapshot snapshot) {
                 for (DataSnapshot postSnapshot : snapshot.getChildren()) {
-                    Map data = (HashMap) postSnapshot.getValue();
+                    Map<?, ?> data = (HashMap<?, ?>) postSnapshot.getValue();
                     Double latitude = (Double) (data.get("latitude"));
                     Double longitude = (Double) (data.get("longitude"));
                     String title = (String) (data.get("locationTitle"));

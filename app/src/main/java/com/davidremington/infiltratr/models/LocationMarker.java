@@ -8,46 +8,47 @@ import com.google.android.gms.maps.model.MarkerOptions;
 import com.davidremington.infiltratr.R;
 
 public class LocationMarker {
-    private LatLng mCoordinates;
-    private Double mLatitude;
-    private Double mLongitude;
-    private String mLocationTitle;
-    private String mSnippet;
-    private BitmapDescriptor mLocationIcon;
+    private LatLng coordinates;
+    private Double latitude;
+    private Double longitude;
+    private String locationTitle;
+    private String snippet;
+    private BitmapDescriptor locationIcon;
 
 
     public LocationMarker(Double latitude, Double longitude, String locationTitle, String snippet) {
-        this.mLatitude = latitude;
-        this.mLongitude = longitude;
-        this.mLocationTitle = locationTitle;
-        this.mSnippet = snippet;
-        this.mLocationIcon = BitmapDescriptorFactory.fromResource(R.drawable.cave_2);
+        this.latitude = latitude;
+        this.longitude = longitude;
+        this.locationTitle = locationTitle;
+        this.snippet = snippet;
+        this.locationIcon = BitmapDescriptorFactory.fromResource(R.drawable.cave_2);
     }
 
     public Double getLatitude() {
-        return mLatitude;
+        return latitude;
     }
 
-    public Double getLongitude() {return mLongitude;}
+    public Double getLongitude() {return longitude;}
 
     public String getLocationTitle() {
-        return mLocationTitle;
+        return locationTitle;
     }
 
     public String getSnippet() {
-        return mSnippet;
+        return snippet;
     }
 
+    public LatLng getCoordinates() { return coordinates; }
 
     public MarkerOptions buildLocationMarker() {
-        mCoordinates = new LatLng(mLatitude, mLongitude);
+        coordinates = new LatLng(latitude, longitude);
 
         return new MarkerOptions()
-                .position(this.mCoordinates)
-                .title(this.mLocationTitle)
-                .snippet(this.mSnippet)
+                .position(this.coordinates)
+                .title(this.locationTitle)
+                .snippet(this.snippet)
                 .anchor(0.5f, 0.5f)
-                .icon(this.mLocationIcon);
+                .icon(this.locationIcon);
     }
 }
 

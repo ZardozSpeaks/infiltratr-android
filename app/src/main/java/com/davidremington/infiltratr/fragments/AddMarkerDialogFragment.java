@@ -38,6 +38,10 @@ public class AddMarkerDialogFragment extends DialogFragment {
         return addMarkerDialogFragment;
     }
 
+    public AddMarkerDialogFragment() {
+        //required empty public constructor
+    }
+
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);

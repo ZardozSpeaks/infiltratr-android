@@ -26,12 +26,18 @@ public class MapDisabledFragment extends Fragment {
     private OnMapDisabledFragmentInteractionListener listener;
 
     public MapDisabledFragment() {
-        // Required empty public constructor
+        // required empty public constructor
     }
 
-
-    public static MapDisabledFragment newInstance() {
-        return new MapDisabledFragment();
+    @Override
+    public void onAttach(@NotNull Context context) {
+        super.onAttach(context);
+        if (context instanceof OnMapDisabledFragmentInteractionListener) {
+            listener = (OnMapDisabledFragmentInteractionListener) context;
+        } else {
+            throw new RuntimeException(context.toString()
+                    + " must implement OnMapDisabledFragmentInteractionListener");
+        }
     }
 
     @Override
@@ -45,17 +51,6 @@ public class MapDisabledFragment extends Fragment {
         View view = inflater.inflate(R.layout.fragment_map_disabled, container, false);
         ButterKnife.bind(this, view);
         return view;
-    }
-
-    @Override
-    public void onAttach(@NotNull Context context) {
-        super.onAttach(context);
-        if (context instanceof OnMapDisabledFragmentInteractionListener) {
-            listener = (OnMapDisabledFragmentInteractionListener) context;
-        } else {
-            throw new RuntimeException(context.toString()
-                    + " must implement OnMapDisabledFragmentInteractionListener");
-        }
     }
 
     @Override
